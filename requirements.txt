@@ -2,4 +2,5 @@ tensorflow
 keras
 numpy
 pandas
-cv2
+opencv-python
+pillow
