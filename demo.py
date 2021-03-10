@@ -8,6 +8,7 @@ from keras.applications.vgg16 import decode_predictions
 from keras.applications.vgg16 import VGG16
 from keras import backend as K
 from keras import models
+from encode_feat import encode_feat
 
 def load_and_preprocess_img(path, target_size=(224, 224)):
     image = load_img(path, target_size=target_size)
@@ -59,7 +60,9 @@ def main():
     feat1, mask1 = extract_activations(model, img1)
     feat2, mask2 = extract_activations(model, img2)
 
-    # TO DO: encode 
+    encode_feat(feat1, mask1)
+    encode_feat(feat2, mask2)
+    # TO DO: encode
     # TO DO: compare
 
 if __name__ == '__main__':

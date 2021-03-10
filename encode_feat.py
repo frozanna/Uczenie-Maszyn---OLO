@@ -16,23 +16,22 @@ def encode_feat(feat, mask):
 
         (thresh, binary_mask) = cv2.threshold(temp_mask, temp_mask.min(), 255, cv2.THRESH_BINARY)
 
-        # allprops = regionprops(binary_mask, temp_mask, 'MeanIntensity', 'BoundingBox');
-        img_label = label(binary_mask) # ???
-        allprops = regionprops(img_label, ['MeanIntensity', 'BoundingBox']) # ???
+        img_label = label(binary_mask)
+        allprops = regionprops(img_label, intensity_image=temp_mask)
 
-        for i, region in allprops:
-            allmean.append(region.MeanIntensity)
-            allbox.append(region.BoundingBox)
+        for i, region in enumerate(allprops):
+            allmean.append(region.mean_intensity)
+            allbox.append(region.bbox)
             whichmask.append(i)
 
-    sort_mean = allmean.sort(reverse=True)
+    sort_mean = np.sort(allmean)[::-1]
 
     threshold = sort_mean[num_pool]
     upper = np.where(allmean >= threshold)
 
-    final_box = allbox[upper, :]
+    final_box = np.array(allbox)[upper]
 
-    final_mask = whichmask[upper]
+    final_mask = np.array(whichmask)[upper]
 
     output = []
 
@@ -41,23 +40,24 @@ def encode_feat(feat, mask):
 
         temp_mask = np.squeeze(mask[final_mask[upper_idx], :, :])
 
-        pool_feat = feat[:, region[2]:(region[2]+region[4]-1), region[1]:(region[1]+region[3]-1)]
+        pool_feat = feat[:, region[1]:(region[1]+region[3]-1), region[0]:(region[0]+region[2]-1)]
 
-        pool_mask = temp_mask[region[2]:(region[2]+region[4]-1), region[1]:(region[1]+region[3]-1)]
+        pool_mask = temp_mask[region[1]:(region[1]+region[3]-1), region[0]:(region[0]+region[2]-1)]
 
-        # pool_feat = reshape(pool_feat,size(pool_feat,1),[]);
-        pool_feat = np.reshape(pool_feat, (len(pool_feat), ??? ))
+        pool_feat = np.reshape(pool_feat, (pool_feat.shape[0], -1))
 
-        # flatten_pool = pool_mask(:)
-        flatten_pool = pool_mask.T # ???
+        flatten_pool = pool_mask.flatten()
+        temp_norm = norm(flatten_pool)
 
-        flatten_pool = flatten_pool / norm(flatten_pool)
+        if temp_norm != 0:
+            flatten_pool = flatten_pool / temp_norm
 
-        pool_multi = pool_feat * flatten_pool
+        pool_multi = pool_feat @ flatten_pool
 
         temp_norm = norm(pool_multi)
         if temp_norm != 0:
             pool_multi = np.divide(pool_multi, temp_norm)
 
-        # output = [output pool_multi]
         output.append(pool_multi) ## ??
+
+    return output
