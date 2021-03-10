@@ -9,6 +9,8 @@ from keras.applications.vgg16 import VGG16
 from keras import backend as K
 from keras import models
 from encode_feat import encode_feat
+from compare_two import compare_two
+
 
 def load_and_preprocess_img(path, target_size=(224, 224)):
     image = load_img(path, target_size=target_size)
@@ -20,11 +22,13 @@ def load_and_preprocess_img(path, target_size=(224, 224)):
     image = preprocess_input(image)
     return image
 
+
 def load_model(summary=False):
     model = VGG16(include_top=False, weights='imagenet')
     if summary:
         model.summary()
     return model
+
 
 def extract_activations(model, img, print_layers=False):
     ''' Returns feat and mask with shape 512x14x14 each. '''
@@ -51,19 +55,21 @@ def extract_activations(model, img, print_layers=False):
 
     return activations
 
+
 def main():
     images_dir = 'example_images'
-    img1 = load_and_preprocess_img(os.path.join(images_dir, '000050.jpg'))
-    img2 = load_and_preprocess_img(os.path.join(images_dir, '000094.jpg'))
+    img1 = load_and_preprocess_img(os.path.join(images_dir, '000095.jpg'))
+    img2 = load_and_preprocess_img(os.path.join(images_dir, '000095.jpg'))
     
     model = load_model()
     feat1, mask1 = extract_activations(model, img1)
     feat2, mask2 = extract_activations(model, img2)
 
-    encode_feat(feat1, mask1)
-    encode_feat(feat2, mask2)
-    # TO DO: encode
-    # TO DO: compare
+    encode1 = encode_feat(feat1, mask1)
+    encode2 = encode_feat(feat2, mask2)
+
+    print(compare_two(encode1, encode2))
+
 
 if __name__ == '__main__':
     main()

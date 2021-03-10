@@ -19,10 +19,10 @@ def encode_feat(feat, mask):
         img_label = label(binary_mask)
         allprops = regionprops(img_label, intensity_image=temp_mask)
 
-        for i, region in enumerate(allprops):
+        for region in allprops:
             allmean.append(region.mean_intensity)
             allbox.append(region.bbox)
-            whichmask.append(i)
+            whichmask.append(mask_idx)
 
     sort_mean = np.sort(allmean)[::-1]
 
@@ -58,6 +58,6 @@ def encode_feat(feat, mask):
         if temp_norm != 0:
             pool_multi = np.divide(pool_multi, temp_norm)
 
-        output.append(pool_multi) ## ??
+        output.append(pool_multi)
 
-    return output
+    return np.array(output)
