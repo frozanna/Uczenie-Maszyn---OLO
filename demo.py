@@ -57,9 +57,9 @@ def extract_activations(model, img, print_layers=False):
 
 
 def main():
-    images_dir = 'example_images'
-    img1 = load_and_preprocess_img(os.path.join(images_dir, '000095.jpg'))
-    img2 = load_and_preprocess_img(os.path.join(images_dir, '000095.jpg'))
+    images_dir = 'training_images'
+    img1 = load_and_preprocess_img(os.path.join(images_dir, 'Corridor1_RGB_2019-10-05-16-22-31-059000.png'))
+    img2 = load_and_preprocess_img(os.path.join(images_dir, 'F107_RGB_2019-10-05-15-08-28-610000.png'))
     
     model = load_model()
     feat1, mask1 = extract_activations(model, img1)
