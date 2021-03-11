@@ -6,7 +6,7 @@ import pandas as pd
 def compare_two(test_feat, refer_feat):
     mask_channel = np.size(test_feat, 0)
 
-    test_temp = np.multiply(test_feat, refer_feat)
+    test_temp = np.dot(test_feat, refer_feat.T)
 
     col_max = np.amax(test_temp, axis=0)
     col_max_idx = np.argmax(test_temp, axis=0)
@@ -33,7 +33,7 @@ def compare_two(test_feat, refer_feat):
 
     nonzero = np.where(row_max != 0)
     test_nonzero = np.squeeze(test_feat[nonzero, :])
-    refer_nonzero = np.squeeze(refer_feat[col_max_idx[nonzero], :])
+    refer_nonzero = np.squeeze(refer_feat[row_max_idx[nonzero], :])
 
     testdist = cdist(C, test_nonzero)
     referdist = cdist(C, refer_nonzero)
