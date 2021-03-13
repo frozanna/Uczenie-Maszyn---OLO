@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
@@ -10,6 +9,7 @@ from keras import backend as K
 from keras import models
 from encode_feat import encode_feat
 from compare_two import compare_two
+import sys
 
 
 def load_and_preprocess_img(path, target_size=(224, 224)):
@@ -57,18 +57,26 @@ def extract_activations(model, img, print_layers=False):
 
 
 def main():
-    images_dir = 'example_images'
-    img1 = load_and_preprocess_img(os.path.join(images_dir, '000095.jpg'))
-    img2 = load_and_preprocess_img(os.path.join(images_dir, '000095.jpg'))
-    
+    current_path = os.path.dirname(os.path.realpath(__file__))
     model = load_model()
+
+    query_images_dir = os.path.join(current_path, 'query_images')
+    directory = os.fsencode(query_images_dir)
+
+    img1 = load_and_preprocess_img(os.path.join(current_path, 'example_images', sys.argv[1]))
     feat1, mask1 = extract_activations(model, img1)
-    feat2, mask2 = extract_activations(model, img2)
-
     encode1 = encode_feat(feat1, mask1)
-    encode2 = encode_feat(feat2, mask2)
 
-    print(compare_two(encode1, encode2))
+    print('Possible places:')
+
+    for file in os.listdir(directory):
+        file_name = os.fsdecode(file)
+        img2 = load_and_preprocess_img(os.path.join(query_images_dir, file_name))
+        feat2, mask2 = extract_activations(model, img2)
+
+        encode2 = encode_feat(feat2, mask2)
+        if compare_two(encode1, encode2) > 0.15:
+            print(os.path.splitext(file_name)[0])
 
 
 if __name__ == '__main__':
