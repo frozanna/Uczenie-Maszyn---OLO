@@ -1,4 +1,9 @@
 import os
+import sys
+import argparse
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" # filter out tensorflow messages
+
 import numpy as np
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
@@ -7,10 +12,12 @@ from keras.applications.vgg16 import decode_predictions
 from keras.applications.vgg16 import VGG16
 from keras import backend as K
 from keras import models
+import tensorflow as tf
+
 from encode_feat import encode_feat
 from compare_two import compare_two
-import sys
 
+tf.get_logger().setLevel('ERROR') 
 
 def load_and_preprocess_img(path, target_size=(224, 224)):
     image = load_img(path, target_size=target_size)
@@ -55,6 +62,13 @@ def extract_activations(model, img, print_layers=False):
 
     return activations
 
+def command_line_args():
+    parser = argparse.ArgumentParser(description=
+    'Compare example image with images in the dataset and return possible location.')
+    required_named = parser.add_argument_group('required named arguments')
+    required_named.add_argument('-i', '--image', help='Example image name',
+                                required=True)
+    return parser.parse_args()
 
 def main():
     current_path = os.path.dirname(os.path.realpath(__file__))
@@ -62,8 +76,12 @@ def main():
 
     query_images_dir = os.path.join(current_path, 'query_images')
     directory = os.fsencode(query_images_dir)
+    args = command_line_args()
+    example_image_name = args.image
 
-    img1 = load_and_preprocess_img(os.path.join(current_path, 'example_images', sys.argv[1]))
+    img1 = load_and_preprocess_img(os.path.join(current_path, 
+                                    'example_images',
+                                    example_image_name))
     feat1, mask1 = extract_activations(model, img1)
     encode1 = encode_feat(feat1, mask1)
 
